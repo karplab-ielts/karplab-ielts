@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -105,7 +105,7 @@
           </div>
         </div>
         <div class="flex items-center space-x-2">
-          <button id="dict-audio-btn" onclick="speakQuickWord()" class="w-9 h-9 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center justify-center transition shadow-sm" title="Nghe phát âm chuẩn bản xứ">
+          <button id="dict-audio-btn" onclick="speakQuickWord()" class="w-9 h-9 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center justify-center transition shadow-sm" title="Nghe phát âm chuẩn">
             <i class="fa-solid fa-volume-high text-sm"></i>
           </button>
           <button onclick="closeQuickDictModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
@@ -115,9 +115,7 @@
       </div>
 
       <!-- Khung hiển thị nghĩa được trích xuất trực tiếp -->
-      <div id="dict-content-body" class="my-4 space-y-3.5 max-h-[60vh] overflow-y-auto custom-scrollbar text-xs leading-relaxed text-slate-700 pr-1">
-        <!-- Rendered by extractAndShowDictionary -->
-      </div>
+      <div id="dict-content-body" class="my-4 space-y-3.5 max-h-[60vh] overflow-y-auto custom-scrollbar text-xs leading-relaxed text-slate-700 pr-1"></div>
 
       <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
         <span class="flex items-center space-x-1.5">
@@ -192,7 +190,7 @@
       
       <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-black uppercase tracking-wider mb-2">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="cheat-strike-badge">STRIKE 1 / 3 VIOLATION</span>
+        <span id="cheat-strike-badge">LẦN VI PHẠM: 1 / 3</span>
       </div>
 
       <h3 class="text-xl sm:text-2xl font-black text-slate-800" id="cheat-modal-title">
@@ -969,7 +967,7 @@
           </div>
         </div>
 
-        <!-- TAB 3: TRÌNH BIÊN TẬP & CHỈNH SỬA ĐỀ ĐÃ ĐĂNG (LIVE EDITOR CHO GIÁO VIÊN) -->
+        <!-- TAB 3: TRÌNH BIÊN TẬP & CHỈNH SỬA ĐỀ ĐÃ ĐĂNG -->
         <div id="tp-view-bank" class="hidden space-y-6">
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -993,7 +991,7 @@
             </div>
           </div>
 
-          <!-- Bộ công cụ định dạng nhanh trợ giúp giáo viên (Formatting Toolbar) -->
+          <!-- Formatting Toolbar -->
           <div class="bg-indigo-50/70 border border-indigo-200 p-3 rounded-xl flex items-center flex-wrap gap-2 text-xs">
             <span class="font-bold text-indigo-900 mr-2 flex items-center"><i class="fa-solid fa-screwdriver-wrench mr-1.5"></i> Công cụ định dạng nhanh:</span>
             <button onclick="applyFormatTag('b')" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded font-bold text-slate-800"><b>B</b> In đậm</button>
@@ -1003,9 +1001,7 @@
             <span class="text-slate-500 text-[11px] ml-auto">Bôi đen chữ trong ô cần sửa rồi click nút công cụ trên</span>
           </div>
 
-          <div id="tp-bank-list" class="space-y-4">
-            <!-- Rendered by JavaScript -->
-          </div>
+          <div id="tp-bank-list" class="space-y-4"></div>
         </div>
 
         <!-- TAB 4: GIAO BÀI TẬP & ĐẶT DEADLINE -->
@@ -1150,7 +1146,7 @@
           <span id="answered-counter" class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">0 / 0</span>
         </div>
         <!-- Autosave Indicator badge -->
-        <span id="autosave-indicator" class="hidden sm:inline-flex items-center space-x-1 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
+        <span id="autosave-indicator" class="hidden sm:inline-flex items-center space-x-1 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200 transition-opacity duration-300">
           <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
           <span>Tự động lưu bài</span>
         </span>
@@ -1170,6 +1166,11 @@
     let currentMode = 'theory'; // 'theory' or 'practice'
     let currentPosFilter = 'all';
     let currentModalsFilter = 'all';
+
+    // Real-Time Scoreboard State
+    let realtimeScoreFilter = 'all';
+    let lastRealtimeSubmitId = null;
+    let liveSyncChannel = null;
 
     // Teacher Security Passcode
     const TEACHER_SECRET_KEY = "nguyenhuutuandangiu";
@@ -1203,7 +1204,7 @@
     let cheatCountdownSeconds = 10;
     let isDisqualified = false;
 
-    // USER ANSWERS STORE: { questionId: selectedKey } (TỰ ĐỘNG KHÔI PHỤC TỪ LOCALSTORAGE)
+    // USER ANSWERS STORE: { questionId: selectedKey }
     const userAnswers = JSON.parse(localStorage.getItem('grammar_saved_answers') || '{}');
 
     // Quick Dictionary Selected Word Cache
@@ -1283,17 +1284,17 @@
         nameInput.addEventListener('input', validateStudentForm);
       }
 
-      // Khởi tạo Text Selection Listener cho tính năng Highlight & Tra từ điển
+      // Khởi tạo kênh Real-Time Scoreboard đồng bộ giữa các tab
+      initRealtimeSyncChannel();
+
       initTextSelectionListener();
 
-      // Load saved Gemini Key if any
       const savedKey = localStorage.getItem('gemini_api_key') || '';
       const keyInput = document.getElementById('tp-gemini-key-input');
       if (keyInput && savedKey) {
         keyInput.value = savedKey;
       }
 
-      // Khôi phục thông tin học sinh nếu đã từng đăng ký
       const savedStudentName = localStorage.getItem('grammar_student_name');
       const savedStudentClass = localStorage.getItem('grammar_student_class') || '';
       if (savedStudentName) {
@@ -1306,7 +1307,6 @@
         startTimer();
       }
 
-      // Khôi phục bộ bài tập custom đã lưu nếu có
       if (customQuestions && customQuestions.length > 0) {
         const customBtn = document.getElementById('topic-btn-custom');
         if (customBtn) customBtn.classList.remove('hidden');
@@ -1332,8 +1332,19 @@
     function initTextSelectionListener() {
       document.addEventListener('mouseup', handleTextSelection);
       document.addEventListener('touchend', () => {
-        setTimeout(handleTextSelection, 200);
+        setTimeout(handleTextSelection, 150);
       });
+
+      // Lắng nghe thêm sự kiện cuộn trang để tự ẩn hoặc cập nhật vị trí toolbar
+      window.addEventListener('scroll', () => {
+        const popup = document.getElementById('selection-dict-popup');
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed) {
+          hideSelectionPopup();
+        } else if (popup && !popup.classList.contains('hidden') && currentSelectedRange) {
+          positionPopupAtRange(currentSelectedRange, popup);
+        }
+      }, { passive: true });
 
       document.addEventListener('mousedown', (e) => {
         const popup = document.getElementById('selection-dict-popup');
@@ -1344,9 +1355,31 @@
       });
     }
 
+    function positionPopupAtRange(range, popup) {
+      const rect = range.getBoundingClientRect();
+      if (!rect || rect.width === 0 || rect.height === 0) return;
+
+      // Không cộng window.scrollY/scrollX vì popup có CSS class 'fixed'
+      const popupHeight = 44; // Chiều cao ước tính của toolbar
+      let top = rect.top - popupHeight - 8;
+      // Nếu vị trí quá sát mép trên viewport thì đặt bên dưới vùng chọn
+      if (top < 10) {
+        top = rect.bottom + 8;
+      }
+
+      // Căn giữa theo chiều ngang của vùng bôi đen, chống tràn 2 cạnh màn hình
+      const popupWidth = 260;
+      let left = rect.left + (rect.width / 2) - (popupWidth / 2);
+      left = Math.max(10, Math.min(window.innerWidth - popupWidth - 10, left));
+
+      popup.style.top = `${Math.round(top)}px`;
+      popup.style.left = `${Math.round(left)}px`;
+    }
+
     function handleTextSelection() {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
+        hideSelectionPopup();
         return;
       }
 
@@ -1354,13 +1387,13 @@
       const cleaned = cleanSearchWord(text);
 
       if (!cleaned || cleaned.length < 2 || cleaned.split(/\s+/).length > 6) {
+        hideSelectionPopup();
         return;
       }
 
       currentSelectedWord = cleaned;
       try {
         currentSelectedRange = selection.getRangeAt(0).cloneRange();
-        // Trích xuất câu ngữ cảnh xung quanh từ được chọn
         const anchorNode = selection.anchorNode;
         if (anchorNode && anchorNode.parentElement) {
           currentSelectedContext = anchorNode.parentElement.innerText || '';
@@ -1368,23 +1401,17 @@
           currentSelectedContext = cleaned;
         }
 
-        const rect = selection.getRangeAt(0).getBoundingClientRect();
         const popup = document.getElementById('selection-dict-popup');
-        if (popup && rect.width > 0) {
-          const top = Math.max(10, rect.top + window.scrollY - 46);
-          const left = Math.min(window.innerWidth - 220, Math.max(10, rect.left + window.scrollX + (rect.width / 2) - 100));
-          popup.style.top = `${top}px`;
-          popup.style.left = `${left}px`;
+        if (popup) {
+          positionPopupAtRange(currentSelectedRange, popup);
           popup.classList.remove('hidden');
         }
       } catch (e) {
-        console.warn("Lỗi xác định vị trí vùng bôi đen:", e);
+        console.warn("Lỗi xác định vị trí bôi đen:", e);
       }
     }
 
-    // ==============================================================
-    // TRÍCH XUẤT ĐỊNH NGHĨA TRỰC TIẾP (HỖ TRỢ CẢ TỪ ĐƠN LẪN CỤM TỪ)
-    // ==============================================================
+    // --- QUICK DICTIONARY LOOKUP ---
     async function extractAndShowDictionary() {
       const word = cleanSearchWord(currentSelectedWord);
       if (!word) return;
@@ -1408,7 +1435,6 @@
 
       modal.classList.remove('hidden');
 
-      // 1. Thử gọi Gemini AI nếu giáo viên đã thiết lập Key
       const apiKey = localStorage.getItem('gemini_api_key');
       if (apiKey) {
         try {
@@ -1421,11 +1447,10 @@
             return;
           }
         } catch (e) {
-          console.warn("Gemini dictionary extraction failed, falling back to smart engine:", e);
+          console.warn("Gemini lookup fallback:", e);
         }
       }
 
-      // 2. Chế độ Smart Fallback: 100% hoạt động mượt mà cho cả từ ghép/cụm từ (ví dụ: best friend) mà không báo lỗi
       if (sourceBadge) {
         sourceBadge.innerText = 'TỰ ĐỘNG (SONG NGỮ A2-B1)';
         sourceBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold uppercase';
@@ -1433,11 +1458,10 @@
       await fetchSmartFallbackDictionary(word, currentSelectedContext, bodyEl, phoneticEl);
     }
 
-    // --- ENGINE DỊCH & BÓC TÁCH THÔNG MINH CHO CỤM TỪ VÀ TỪ ĐƠN ---
     async function fetchSmartFallbackDictionary(targetWord, contextSentence, bodyEl, phoneticEl) {
       const words = targetWord.split(/\s+/);
       const isPhrase = words.length > 1;
-      const lookupWord = isPhrase ? words[words.length - 1] : targetWord; // Bóc tách từ gốc/từ chính
+      const lookupWord = isPhrase ? words[words.length - 1] : targetWord;
 
       let vietnameseMeaning = "";
       try {
@@ -1449,7 +1473,7 @@
           }
         }
       } catch (e) {
-        console.warn("Google translate fallback error:", e);
+        console.warn("Translation fallback error:", e);
       }
 
       if (!vietnameseMeaning) {
@@ -1464,7 +1488,7 @@
           dictData = json[0];
         }
       } catch (e) {
-        console.warn("Dictionary lookup error:", e);
+        console.warn("Dictionary error:", e);
       }
 
       let ipa = '';
@@ -1500,7 +1524,6 @@
       }
 
       let html = `
-        <!-- Nghĩa Tiếng Việt Cốt Lõi Dành Cho Học Sinh A2-B1 -->
         <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm space-y-1">
           <div class="flex items-center justify-between">
             <span class="px-2 py-0.5 rounded-md bg-white/20 text-[10px] font-black uppercase text-amber-200">
@@ -1523,18 +1546,6 @@
         `;
       }
 
-      if (isPhrase) {
-        html += `
-          <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-1">
-            <div class="flex items-center space-x-1.5 font-bold text-amber-900">
-              <i class="fa-solid fa-tree text-amber-600"></i>
-              <span>Từ trung tâm cấu thành cụm: <strong class="uppercase text-indigo-700 font-black">${lookupWord}</strong></span>
-            </div>
-            <p class="text-slate-600">Học sinh nên nắm vững từ gốc <strong>"${lookupWord}"</strong> để mở rộng thêm các cụm từ khác.</p>
-          </div>
-        `;
-      }
-
       if (definitions.length > 0) {
         html += `
           <div class="space-y-2 pt-1">
@@ -1553,48 +1564,22 @@
       bodyEl.innerHTML = html;
     }
 
-    // --- GEMINI AI: DỊCH THEO NGỮ CẢNH CÂU & ĐỊNH NGHĨA TIẾNG VIỆT DỄ HIỂU (A2-B1) ---
     async function extractContextualWordFamilyViaGemini(word, contextSentence, apiKey) {
-      const prompt = `Bạn là trợ lý giáo viên tiếng Anh nhiệt huyết, chuyên hỗ trợ học sinh Việt Nam trình độ A2 - B1 (tiểu học/THCS/THPT) học từ vựng và ngữ pháp.
-Người học vừa bôi đen từ/cụm từ: "${word}".
-Ngữ cảnh của câu chứa từ đó trong bài tập/lý thuyết: "${contextSentence || word}".
-
-Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việt ngắn gọn, dễ hiểu và trả về một đối tượng JSON thuần túy (không dùng markdown \`\`\`json):
+      const prompt = `Bạn là trợ lý giáo viên tiếng Anh chuyên hỗ trợ học sinh Việt Nam trình độ A2 - B1.
+Người học vừa chọn: "${word}".
+Ngữ cảnh trong bài: "${contextSentence || word}".
+Trả về JSON chuẩn không bọc markdown:
 {
   "word": "${word}",
-  "phonetic": "/phiên âm IPA chuẩn của từ hoặc cụm/",
-  "partOfSpeech": "Từ loại hoặc Cụm từ (Danh từ / Cụm danh từ / Động từ / Tính từ...)",
-  "vietnameseDefinition": "Định nghĩa tiếng Việt đơn giản, súc tích, dễ hiểu nhất dành cho học sinh A2-B1 (giải thích từ này có nghĩa là gì trong giao tiếp đời sống)",
-  "contextTranslation": "Nghĩa tiếng Việt chuẩn xác của từ trong câu bài tập này",
-  "explanationInContext": "Giải thích tại sao trong câu này từ đó lại mang nghĩa này (chỉ ra dấu hiệu ngữ pháp hoặc từ đi kèm)",
-  "example": {
-    "sentence": "Một câu ví dụ ngắn gọn, dễ nhớ (trình độ A2-B1)",
-    "translation": "Dịch tiếng Việt của câu ví dụ"
-  },
-  "rootWord": {
-    "lemma": "Từ gốc hoặc từ chính tạo nên cụm",
-    "partOfSpeech": "Từ loại của từ gốc",
-    "phonetic": "/phiên âm IPA của từ gốc/",
-    "meaning": "Nghĩa tiếng Việt ngắn gọn của từ gốc"
-  },
-  "wordFamily": {
-    "nouns": [
-      {"word": "từ danh từ", "meaning": "nghĩa tiếng Việt"}
-    ],
-    "verbs": [
-      {"word": "từ động từ", "meaning": "nghĩa tiếng Việt"}
-    ],
-    "adjectives": [
-      {"word": "từ tính từ", "meaning": "nghĩa tiếng Việt"}
-    ],
-    "adverbs": [
-      {"word": "từ trạng từ", "meaning": "nghĩa tiếng Việt"}
-    ]
-  },
-  "collocations": [
-    {"phrase": "cụm từ hay gặp", "meaning": "nghĩa tiếng Việt"}
-  ],
-  "learningTip": "Mẹo ghi nhớ nhanh cho học sinh A2-B1"
+  "phonetic": "/phiên âm IPA/",
+  "partOfSpeech": "Từ loại",
+  "vietnameseDefinition": "Định nghĩa tiếng Việt đơn giản cho A2-B1",
+  "contextTranslation": "Nghĩa trong câu",
+  "explanationInContext": "Giải thích ngữ pháp ngắn",
+  "example": { "sentence": "Ví dụ tiếng Anh", "translation": "Dịch nghĩa" },
+  "rootWord": { "lemma": "Từ gốc", "partOfSpeech": "Từ loại", "phonetic": "/IPA/", "meaning": "Nghĩa gốc" },
+  "wordFamily": { "nouns": [], "verbs": [], "adjectives": [], "adverbs": [] },
+  "learningTip": "Mẹo nhớ"
 }`;
 
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
@@ -1620,20 +1605,7 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       phoneticEl.innerText = parsed.phonetic || '';
       audioBtn.onclick = () => speakWordAudio(parsed.word || word);
 
-      const renderWfBranch = (items) => {
-        if (!items || !Array.isArray(items) || items.length === 0) return '<span class="text-slate-400 italic">Không phổ biến</span>';
-        return items.map(item => `
-          <span class="inline-flex items-center space-x-1 mr-2 mb-1 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
-            <strong class="text-slate-800">${item.word || item}</strong>
-            ${item.meaning ? `<span class="text-slate-500 font-normal">(${item.meaning})</span>` : ''}
-          </span>
-        `).join('');
-      };
-
-      const wf = parsed.wordFamily || {};
-
-      let html = `
-        <!-- 1. ĐỊNH NGHĨA TIẾNG VIỆT DỄ HIỂU CHO HỌC SINH A2-B1 -->
+      bodyEl.innerHTML = `
         <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm space-y-1.5">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-wider text-amber-200">
@@ -1645,122 +1617,11 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
           </div>
           <div class="text-base font-extrabold text-white">${parsed.vietnameseDefinition || parsed.contextTranslation}</div>
         </div>
-
-        <!-- 2. NGHĨA THEO NGỮ CẢNH CÂU BÀI TẬP HIỆN TẠI -->
         <div class="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-indigo-900 text-xs flex items-center">
-              <i class="fa-solid fa-crosshairs text-indigo-600 mr-1.5"></i> Nghĩa trong câu bài tập này:
-            </span>
-            <span class="text-xs font-black text-indigo-700 bg-white px-2 py-0.5 rounded-lg border border-indigo-200">${parsed.contextTranslation || parsed.vietnameseDefinition}</span>
-          </div>
-          ${parsed.explanationInContext ? `<p class="text-xs text-slate-700 leading-relaxed">${parsed.explanationInContext}</p>` : ''}
+          <span class="font-extrabold text-indigo-900 text-xs">Nghĩa trong ngữ cảnh:</span>
+          <p class="text-xs text-slate-700">${parsed.explanationInContext || ''}</p>
         </div>
-
-        <!-- 3. TRÍCH CÂU NGỮ CẢNH BÀI LÀM -->
-        ${contextSentence ? `
-          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
-            <span class="font-bold text-slate-500 uppercase text-[10px] block mb-1">
-              <i class="fa-solid fa-quote-left mr-1 text-indigo-500"></i> Câu trong bài đang làm:
-            </span>
-            <p class="text-slate-700 italic">"${contextSentence.replace(new RegExp(`(${word})`, 'gi'), '<mark class="bg-amber-200 font-bold px-1 rounded text-slate-900">$1</mark>')}"</p>
-          </div>
-        ` : ''}
-
-        <!-- 4. VÍ DỤ MINH HỌA SONG NGỮ DỄ HIỂU -->
-        ${parsed.example && parsed.example.sentence ? `
-          <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs space-y-1">
-            <span class="font-bold text-amber-800 uppercase text-[10px] flex items-center">
-              <i class="fa-solid fa-comment-dots mr-1 text-amber-600"></i> Ví dụ dễ nhớ:
-            </span>
-            <p class="font-semibold text-slate-800">"${parsed.example.sentence}"</p>
-            <p class="text-slate-600 italic">➜ ${parsed.example.translation}</p>
-          </div>
-        ` : ''}
-
-        <!-- 5. TỪ GỐC (ROOT / BASE WORD) -->
-        ${parsed.rootWord && parsed.rootWord.lemma ? `
-          <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
-            <div class="flex items-center space-x-3">
-              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow-sm">
-                <i class="fa-solid fa-seedling"></i>
-              </div>
-              <div>
-                <div class="flex items-center space-x-1.5">
-                  <span class="text-[10px] font-bold text-emerald-800 uppercase">Từ Gốc (Root):</span>
-                  <span class="text-sm font-black text-emerald-950">${parsed.rootWord.lemma}</span>
-                  ${parsed.rootWord.phonetic ? `<span class="text-emerald-700 font-mono text-[11px]">${parsed.rootWord.phonetic}</span>` : ''}
-                </div>
-                <p class="text-slate-700 text-xs font-semibold mt-0.5">
-                  <i class="fa-solid fa-arrow-right text-[10px] text-emerald-600 mr-1"></i> Nghĩa: <span class="text-emerald-900">${parsed.rootWord.meaning || 'Nghĩa gốc'}</span>
-                  ${parsed.rootWord.partOfSpeech ? `<span class="text-slate-500 font-normal ml-1">(${parsed.rootWord.partOfSpeech})</span>` : ''}
-                </p>
-              </div>
-            </div>
-            <button onclick="speakWordAudio('${parsed.rootWord.lemma}')" class="w-8 h-8 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Nghe phát âm từ gốc">
-              <i class="fa-solid fa-volume-high text-xs"></i>
-            </button>
-          </div>
-        ` : ''}
-
-        <!-- 6. BẢNG GIA ĐÌNH TỪ KÈM NGHĨA TIẾNG VIỆT TỪNG NHÁNH (WORD FAMILY TABLE) -->
-        <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div class="bg-slate-900 text-white px-3.5 py-2.5 flex items-center justify-between text-xs font-bold">
-            <span class="flex items-center space-x-1.5">
-              <i class="fa-solid fa-diagram-project text-amber-300"></i>
-              <span>Gia Đình Từ Có Dịch Nghĩa (Word Family)</span>
-            </span>
-            <span class="text-[10px] text-slate-400 font-normal">Học 1 từ nhớ cả họ từ</span>
-          </div>
-          <table class="w-full text-left text-xs bg-slate-50 divide-y divide-slate-100">
-            <tbody class="divide-y divide-slate-200/60">
-              <tr class="hover:bg-blue-50/40">
-                <td class="py-2.5 px-3 font-bold text-blue-700 bg-blue-50/70 w-32 align-top"><i class="fa-solid fa-cube mr-1"></i> Danh từ (N):</td>
-                <td class="py-2.5 px-3">${renderWfBranch(wf.nouns)}</td>
-              </tr>
-              <tr class="hover:bg-red-50/40">
-                <td class="py-2.5 px-3 font-bold text-red-700 bg-red-50/70 w-32 align-top"><i class="fa-solid fa-bolt mr-1"></i> Động từ (V):</td>
-                <td class="py-2.5 px-3">${renderWfBranch(wf.verbs)}</td>
-              </tr>
-              <tr class="hover:bg-amber-50/40">
-                <td class="py-2.5 px-3 font-bold text-amber-700 bg-amber-50/70 w-32 align-top"><i class="fa-solid fa-palette mr-1"></i> Tính từ (Adj):</td>
-                <td class="py-2.5 px-3">${renderWfBranch(wf.adjectives)}</td>
-              </tr>
-              <tr class="hover:bg-purple-50/40">
-                <td class="py-2.5 px-3 font-bold text-purple-700 bg-purple-50/70 w-32 align-top"><i class="fa-solid fa-wind mr-1"></i> Trạng từ (Adv):</td>
-                <td class="py-2.5 px-3">${renderWfBranch(wf.adverbs)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 7. MẸO GHI NHỚ CHO HỌC SINH (LEARNING TIP) -->
-        ${parsed.learningTip ? `
-          <div class="p-3 rounded-2xl bg-violet-50 border border-violet-200 text-xs text-violet-950 flex items-start space-x-2">
-            <i class="fa-solid fa-wand-magic-sparkles text-violet-600 mt-0.5"></i>
-            <div>
-              <strong class="font-bold text-violet-800">Mẹo nhớ nhanh (A2-B1):</strong>
-              <p class="text-slate-700 mt-0.5">${parsed.learningTip}</p>
-            </div>
-          </div>
-        ` : ''}
-
-        <!-- 8. COLLOCATIONS HAY GẶP -->
-        ${Array.isArray(parsed.collocations) && parsed.collocations.length > 0 ? `
-          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
-            <span class="font-bold text-slate-600 block"><i class="fa-solid fa-link text-indigo-500 mr-1"></i> Cụm từ hay gặp trong bài thi:</span>
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              ${parsed.collocations.map(col => {
-                const phrase = typeof col === 'object' ? col.phrase : col;
-                const meaning = typeof col === 'object' && col.meaning ? ` : ${col.meaning}` : '';
-                return `<span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-indigo-900 font-semibold text-[11px] shadow-2xs">${phrase}<span class="text-slate-500 font-normal">${meaning}</span></span>`;
-              }).join('')}
-            </div>
-          </div>
-        ` : ''}
       `;
-
-      bodyEl.innerHTML = html;
       return true;
     }
 
@@ -1775,8 +1636,7 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
 
     function speakSelectedWord() {
       const word = cleanSearchWord(currentSelectedWord);
-      if (!word) return;
-      speakWordAudio(word);
+      if (word) speakWordAudio(word);
     }
 
     function speakQuickWord() {
@@ -1804,7 +1664,7 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
         currentSelectedRange.insertNode(span);
         window.getSelection().removeAllRanges();
       } catch (err) {
-        console.warn("Không thể highlight trực tiếp nút này:", err);
+        console.warn("Lỗi highlight:", err);
       }
       hideSelectionPopup();
     }
@@ -1898,7 +1758,7 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       const modal = document.getElementById('anti-cheat-modal');
 
       if (strikeBadge) strikeBadge.innerText = `LẦN VI PHẠM: ${cheatViolationsCount} / ${MAX_CHEAT_VIOLATIONS}`;
-      if (cheatDesc) cheatDesc.innerText = `${reasonMsg} Cảnh báo: Việc thoát màn hình hoặc mở tab khác là hoàn toàn bị cấm.`;
+      if (cheatDesc) cheatDesc.innerText = `${reasonMsg} Cảnh báo: Thoát màn hình hoặc mở tab khác là hoàn toàn bị cấm.`;
 
       if (cheatViolationsCount >= MAX_CHEAT_VIOLATIONS) {
         disqualifyStudentCheat();
@@ -1968,17 +1828,139 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
     function saveDisqualificationToLeaderboard(topicName, timeStr) {
       const history = JSON.parse(localStorage.getItem('grammar_leaderboard') || '[]');
       const newEntry = {
+        id: 'sub-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
         name: studentInfo.name || 'Học sinh',
         class: studentInfo.class || '-',
         topic: topicName,
         score: `0 (HỦY BÀI)`,
         pct: `0% [GIAN LẬN]`,
+        pctNum: 0,
         time: timeStr,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString('vi-VN'),
         isCheated: true
       };
       history.unshift(newEntry);
-      localStorage.setItem('grammar_leaderboard', JSON.stringify(history.slice(0, 30)));
+      localStorage.setItem('grammar_leaderboard', JSON.stringify(history.slice(0, 50)));
+
+      // Phát tín hiệu Real-Time đến Cổng Giáo Viên
+      broadcastLiveSubmission(newEntry);
+    }
+
+    // --- REAL-TIME BROADCAST & SYNCHRONIZATION ENGINE ---
+    function initRealtimeSyncChannel() {
+      if ('BroadcastChannel' in window) {
+        try {
+          liveSyncChannel = new BroadcastChannel('grammar_quiz_sync_channel');
+          liveSyncChannel.onmessage = (event) => {
+            if (event.data && event.data.type === 'NEW_STUDENT_SUBMISSION') {
+              handleIncomingLiveSubmission(event.data.payload);
+            }
+          };
+        } catch (e) {
+          console.warn("BroadcastChannel error:", e);
+        }
+      }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'grammar_latest_live_event' && e.newValue) {
+          try {
+            const data = JSON.parse(e.newValue);
+            handleIncomingLiveSubmission(data);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    function broadcastLiveSubmission(submissionData) {
+      if (liveSyncChannel) {
+        liveSyncChannel.postMessage({
+          type: 'NEW_STUDENT_SUBMISSION',
+          payload: submissionData
+        });
+      }
+      localStorage.setItem('grammar_latest_live_event', JSON.stringify(submissionData));
+    }
+
+    function playLiveChime(isCheated = false) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (isCheated) {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.35);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.35);
+        }
+      } catch (err) {
+        // Ignored if user hasn't interacted
+      }
+    }
+
+    function showLiveNotificationToast(submission) {
+      playLiveChime(submission.isCheated);
+
+      const toast = document.createElement('div');
+      toast.className = `fixed top-5 right-5 z-[100] max-w-sm p-4 rounded-2xl shadow-2xl border text-xs font-semibold backdrop-blur-md animate-in slide-in-from-top-4 duration-300 flex items-start space-x-3 ${
+        submission.isCheated 
+          ? 'bg-rose-950/90 text-rose-100 border-rose-500 shadow-rose-900/40' 
+          : 'bg-slate-900/95 text-white border-indigo-500/80 shadow-indigo-950/50'
+      }`;
+
+      toast.innerHTML = `
+        <div class="w-8 h-8 rounded-xl ${submission.isCheated ? 'bg-rose-600 text-white' : 'bg-indigo-600 text-amber-300'} flex items-center justify-center flex-shrink-0 text-sm shadow">
+          <i class="fa-solid ${submission.isCheated ? 'fa-triangle-exclamation' : 'fa-bell fa-shake'}"></i>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="font-extrabold uppercase text-[10px] tracking-wider ${submission.isCheated ? 'text-rose-400' : 'text-emerald-400'}">
+              ${submission.isCheated ? 'CẢNH BÁO VI PHẠM' : 'HỌC SINH VỪA NỘP BÀI'}
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">${submission.time}</span>
+          </div>
+          <p class="font-bold text-sm text-white">${submission.name} <span class="text-xs text-slate-300 font-normal">(${submission.class})</span></p>
+          <p class="text-xs mt-1 ${submission.isCheated ? 'text-rose-200' : 'text-slate-300'}">
+            ${submission.topic} • <strong>${submission.score}</strong> (${submission.pct})
+          </p>
+        </div>
+      `;
+
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+
+    function handleIncomingLiveSubmission(submission) {
+      if (!submission) return;
+      lastRealtimeSubmitId = submission.id;
+
+      const pingEl = document.getElementById('rt-last-ping');
+      if (pingEl) pingEl.innerText = `Vừa nhận lúc: ${new Date().toLocaleTimeString('vi-VN')}`;
+
+      showLiveNotificationToast(submission);
+
+      const portal = document.getElementById('teacher-portal-modal');
+      if (portal && !portal.classList.contains('hidden')) {
+        loadTeacherAnalytics();
+      }
     }
 
     // --- TIMER SYSTEM ---
@@ -2075,10 +2057,10 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       currentPosFilter = type;
       ['all', 'task1', 'task2'].forEach(t => {
         const btn = document.getElementById(`pos-tab-${t}`);
-        if (t === type) {
-          btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white";
-        } else {
-          btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200";
+        if (btn) {
+          btn.className = (t === type) 
+            ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white" 
+            : "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200";
         }
       });
       renderQuiz('pos');
@@ -2089,11 +2071,9 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       ['all', 'task2', 'task1', 'task5'].forEach(t => {
         const btn = document.getElementById(`modals-tab-${t}`);
         if (btn) {
-          if (t === type) {
-            btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-600 text-white";
-          } else {
-            btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200";
-          }
+          btn.className = (t === type)
+            ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-600 text-white"
+            : "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200";
         }
       });
       renderQuiz('modals');
@@ -2177,7 +2157,6 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
 
     function selectOption(qId, key) {
       userAnswers[qId] = key;
-      // TỰ ĐỘNG LƯU ĐÁP ÁN VÀO LOCALSTORAGE TỨC THÌ
       localStorage.setItem('grammar_saved_answers', JSON.stringify(userAnswers));
 
       const buttons = document.querySelectorAll(`.opt-btn-${qId}`);
@@ -2198,7 +2177,6 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
         badge.classList.add('bg-indigo-600', 'text-white');
       }
 
-      // Hiển thị hiệu ứng badge autosave nhấp nháy
       const autoBadge = document.getElementById('autosave-indicator');
       if (autoBadge) {
         autoBadge.classList.remove('opacity-50');
@@ -2399,7 +2377,6 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       else if (topic === 'custom') activeList = customQuestions;
 
       activeList.forEach(q => delete userAnswers[q.id]);
-      // Cập nhật lại localStorage sau khi reset
       localStorage.setItem('grammar_saved_answers', JSON.stringify(userAnswers));
 
       renderQuiz(topic);
@@ -2417,16 +2394,21 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
     function saveResultToLeaderboard(topicName, score, total, pct, timeStr) {
       const history = JSON.parse(localStorage.getItem('grammar_leaderboard') || '[]');
       const newEntry = {
+        id: 'sub-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
         name: studentInfo.name || 'Học sinh',
         class: studentInfo.class || '-',
         topic: topicName,
         score: `${score}/${total}`,
         pct: `${pct}%`,
+        pctNum: Number(pct),
         time: timeStr,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString('vi-VN')
       };
       history.unshift(newEntry);
-      localStorage.setItem('grammar_leaderboard', JSON.stringify(history.slice(0, 30)));
+      localStorage.setItem('grammar_leaderboard', JSON.stringify(history.slice(0, 50)));
+
+      // Phát trực tiếp lên kênh Real-Time Scoreboard
+      broadcastLiveSubmission(newEntry);
     }
 
     function openLeaderboardModal() {
@@ -2461,9 +2443,7 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       openLeaderboardModal();
     }
 
-    // ==============================================================
-    // TEACHER PORTAL & TRÍCH XUẤT TÀI LIỆU PDF/WORD & GEMINI AI
-    // ==============================================================
+    // --- TEACHER PORTAL LOGIC ---
     function openTeacherAuthModal() {
       document.getElementById('teacher-password-input').value = '';
       document.getElementById('teacher-auth-error').classList.add('hidden');
@@ -2523,7 +2503,6 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       setTimeout(() => indicator.classList.add('hidden'), 2500);
     }
 
-    // --- XỬ LÝ FILE PDF / WORD / TXT BẰNG JS THUẦN KHÔNG LỖI FONT ---
     async function extractTextFromDocx(file) {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
@@ -2577,13 +2556,12 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       }
     }
 
-    // --- GEMINI AI PARSER ---
     async function parseWithGeminiAI() {
       const rawText = document.getElementById('tp-quiz-raw-text').value.trim();
       const apiKey = localStorage.getItem('gemini_api_key') || document.getElementById('tp-gemini-key-input').value.trim();
 
       if (!rawText) {
-        alert("Vui lòng tải tệp hoặc dán nội dung đề thi trước!");
+        showCustomNotice("Vui lòng tải tệp hoặc dán nội dung đề thi trước!");
         return;
       }
 
@@ -2594,42 +2572,19 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
       loadText.innerText = "Gemini AI đang bóc tách câu hỏi, đáp án và lời giải chi tiết...";
 
       try {
-        const systemPrompt = `Bạn là chuyên gia khảo thí tiếng Anh. Nhiệm vụ của bạn là đọc đề thi trắc nghiệm tiếng Anh từ văn bản thô hoặc trích xuất từ PDF/Word, chuẩn hóa thành mảng đối tượng JSON. Mỗi câu hỏi gồm:
-- sentence: nội dung câu hỏi (chứa chỗ trống ______ nếu là dạng điền từ).
-- options: mảng gồm 4 phần tử với key là "A", "B", "C", "D" và text là nội dung phương án.
-- correct: chữ cái đáp án đúng ("A", "B", "C" hoặc "D").
-- explanation: giải thích ngắn gọn, súc tích và chuẩn xác về mặt ngữ pháp bằng tiếng Việt.`;
+        const systemPrompt = `Bạn là chuyên gia khảo thí tiếng Anh. Nhiệm vụ: Đọc đề thi từ text thô, chuẩn hóa thành mảng JSON gồm:
+- sentence: nội dung câu hỏi (chỗ trống ______)
+- options: mảng 4 phần tử { key: "A"|"B"|"C"|"D", text: "..." }
+- correct: chữ cái đáp án đúng ("A"|"B"|"C"|"D")
+- explanation: giải thích ngữ pháp tiếng Việt.`;
 
-        const userQuery = `Hãy chuyển tài liệu bài tập sau thành mảng JSON:\n\n${rawText.slice(0, 15000)}`;
+        const userQuery = `Hãy chuyển bài tập sau thành JSON mảng:\n\n${rawText.slice(0, 15000)}`;
 
         const payload = {
           contents: [{ parts: [{ text: userQuery }] }],
           systemInstruction: { parts: [{ text: systemPrompt }] },
           generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  "sentence": { "type": "STRING" },
-                  "options": {
-                    "type": "ARRAY",
-                    "items": {
-                      "type": "OBJECT",
-                      "properties": {
-                        "key": { "type": "STRING" },
-                        "text": { "type": "STRING" }
-                      },
-                      "required": ["key", "text"]
-                    }
-                  },
-                  "correct": { "type": "STRING" },
-                  "explanation": { "type": "STRING" }
-                },
-                "required": ["sentence", "options", "correct", "explanation"]
-              }
-            }
+            responseMimeType: "application/json"
           }
         };
 
@@ -2641,12 +2596,12 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
         });
 
         if (!response.ok) {
-          throw new Error(`Gemini API báo lỗi HTTP: ${response.status}. Hãy kiểm tra lại API Key hoặc dùng tính năng Phân Tích Nhanh (Regex).`);
+          throw new Error(`Gemini API HTTP Error: ${response.status}`);
         }
 
         const result = await response.json();
         const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!jsonText) throw new Error("Mô hình không trả về nội dung câu hỏi.");
+        if (!jsonText) throw new Error("Mô hình không trả về nội dung.");
 
         const parsedArray = JSON.parse(jsonText);
         stagingQuestions = parsedArray.map((q, idx) => ({
@@ -2663,12 +2618,11 @@ Hãy phân tích thật rõ ràng, thân thiện, dùng từ ngữ tiếng Việ
         setTimeout(() => indicator.classList.add('hidden'), 2500);
       } catch (err) {
         indicator.className = "p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center space-x-2";
-        loadText.innerHTML = `<span><strong>Thông báo:</strong> Không thể gọi Gemini (${err.message}). Đang tự động chuyển sang bóc tách Regex offline...</span>`;
+        loadText.innerHTML = `<span><strong>Thông báo:</strong> Không gọi được Gemini (${err.message}). Chuyển sang bóc tách Regex...</span>`;
         parseRawQuizContent();
       }
     }
 
-    // --- REGEX OFFLINE FALLBACK PARSER ---
     function parseRawQuizContent() {
       const rawText = document.getElementById('tp-quiz-raw-text').value;
       if (!rawText.trim()) return;
@@ -2749,7 +2703,6 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
       document.getElementById('tp-quiz-raw-text').value = '';
     }
 
-    // --- LIVE PREVIEW & EDIT TRONG TAB UPLOADER ---
     function renderTeacherPreview() {
       const container = document.getElementById('tp-preview-list');
       const countEl = document.getElementById('tp-preview-count');
@@ -2868,9 +2821,7 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
       switchTeacherTab('bank');
     }
 
-    // ==============================================================
-    // TAB 3: TRÌNH CHỈNH SỬA TOÀN DIỆN KHO ĐỀ ĐÃ ĐĂNG (LIVE EDITOR)
-    // ==============================================================
+    // --- QUESTION BANK EDITOR ---
     function renderTeacherBankList() {
       const container = document.getElementById('tp-bank-list');
       if (!container) return;
@@ -2911,7 +2862,7 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">Nội dung câu hỏi (hỗ trợ thẻ HTML: &lt;b&gt;, &lt;i&gt;, &lt;u&gt;):</label>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Nội dung câu hỏi (hỗ trợ &lt;b&gt;, &lt;i&gt;, &lt;u&gt;):</label>
             <input type="text" value="${q.sentence.replace(/"/g, '&quot;')}" onfocus="setActiveInput(this)" onchange="updateBankSentence(${idx}, this.value)"
                    class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
@@ -2941,7 +2892,7 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
 
     function applyFormatTag(type) {
       if (!activeEditorInput) {
-        alert("Vui lòng click vào ô câu hỏi hoặc đáp án bạn muốn chèn định dạng!");
+        showCustomNotice("Vui lòng click vào ô câu hỏi hoặc đáp án bạn muốn chèn định dạng!");
         return;
       }
 
@@ -3004,10 +2955,18 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
     function saveBankQuestionsDirectly() {
       localStorage.setItem('grammar_custom_questions', JSON.stringify(customQuestions));
       renderQuiz('custom');
-      alert("Đã lưu toàn bộ thay đổi vào đề thi của học sinh thành công!");
+      showCustomNotice("Đã lưu toàn bộ thay đổi vào đề thi của học sinh thành công!");
     }
 
-    // --- TAB 1 & TAB 4: ANALYTICS & DEADLINE ---
+    function showCustomNotice(msg) {
+      const banner = document.createElement('div');
+      banner.className = "fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 text-xs font-bold flex items-center space-x-2";
+      banner.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400"></i><span>${msg}</span>`;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 3000);
+    }
+
+    // --- TAB 1 & 4: ANALYTICS & DEADLINE ---
     function loadTeacherAnalytics() {
       const history = JSON.parse(localStorage.getItem('grammar_leaderboard') || '[]');
       document.getElementById('tp-stat-submissions').innerText = history.length;
@@ -3017,12 +2976,32 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
       if (history.length > 0) {
         const totalPct = history.reduce((acc, curr) => acc + parseInt(curr.pct || '0'), 0);
         document.getElementById('tp-stat-avg').innerText = Math.round(totalPct / history.length) + '%';
+        const maxPct = Math.max(...history.map(item => item.pctNum !== undefined ? item.pctNum : parseInt(item.pct || '0')));
+        const highEl = document.getElementById('tp-stat-highest');
+        if (highEl) highEl.innerText = `${maxPct}%`;
       } else {
         document.getElementById('tp-stat-avg').innerText = '0%';
+        const highEl = document.getElementById('tp-stat-highest');
+        if (highEl) highEl.innerText = '0%';
       }
 
       document.getElementById('tp-stat-active-hw').innerText = currentAssignmentConfig ? '1 Bài' : '0';
-      renderTeacherStudentTable(history);
+      filterTeacherStudentTable();
+    }
+
+    function filterScoreboardGrade(gradeType) {
+      realtimeScoreFilter = gradeType;
+      ['all', 'excel', 'pass', 'review', 'cheat'].forEach(g => {
+        const btn = document.getElementById(`rt-filter-${g}`);
+        if (btn) {
+          if (g === gradeType) {
+            btn.className = "px-2.5 py-1 rounded-lg bg-white text-indigo-700 shadow-xs";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-slate-600 hover:text-indigo-700";
+          }
+        }
+      });
+      filterTeacherStudentTable();
     }
 
     function renderTeacherStudentTable(list) {
@@ -3034,42 +3013,65 @@ Giải thích: Dấu hiệu tomorrow dạng phủ định diễn tả khả năn
         return;
       }
 
-      tbody.innerHTML = list.map((item, idx) => `
-        <tr class="hover:bg-slate-50 ${item.isCheated ? 'bg-rose-50/70 border-l-4 border-l-rose-500' : ''}">
-          <td class="py-3 px-4 font-bold text-slate-400">${idx + 1}</td>
-          <td class="py-3 px-4 font-bold ${item.isCheated ? 'text-rose-700' : 'text-slate-800'}">
-            ${item.isCheated ? '<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1" title="Vi phạm gian lận"></i>' : ''}
-            ${item.name}
-          </td>
-          <td class="py-3 px-4 text-slate-600">${item.class || '-'}</td>
-          <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">${item.topic}</span></td>
-          <td class="py-3 px-4 font-bold ${item.isCheated ? 'text-rose-600' : 'text-indigo-600'}">${item.score}</td>
-          <td class="py-3 px-4">
-            <span class="font-bold ${item.isCheated ? 'text-rose-600 px-2 py-0.5 rounded bg-rose-100 text-xs' : 'text-emerald-600'}">
-              ${item.pct}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-slate-600">${item.time}</td>
-          <td class="py-3 px-4 text-xs text-slate-400">${item.timestamp}</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = list.map((item, idx) => {
+        const isLatest = lastRealtimeSubmitId && item.id === lastRealtimeSubmitId;
+        const rowClass = item.isCheated 
+          ? 'bg-rose-50/70 border-l-4 border-l-rose-500' 
+          : isLatest 
+            ? 'bg-indigo-50/80 border-l-4 border-l-indigo-600 transition-colors animate-pulse' 
+            : 'hover:bg-slate-50';
+
+        return `
+          <tr class="${rowClass}">
+            <td class="py-3 px-4 font-bold text-slate-400">${idx + 1}</td>
+            <td class="py-3 px-4 font-bold ${item.isCheated ? 'text-rose-700' : 'text-slate-800'}">
+              ${item.isCheated ? '<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1" title="Vi phạm gian lận"></i>' : ''}
+              ${isLatest ? '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>' : ''}
+              ${item.name}
+            </td>
+            <td class="py-3 px-4 text-slate-600">${item.class || '-'}</td>
+            <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">${item.topic}</span></td>
+            <td class="py-3 px-4 font-bold ${item.isCheated ? 'text-rose-600' : 'text-indigo-600'}">${item.score}</td>
+            <td class="py-3 px-4">
+              <span class="font-bold ${item.isCheated ? 'text-rose-600 px-2 py-0.5 rounded bg-rose-100 text-xs' : (item.pctNum >= 90 ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200' : (item.pctNum >= 70 ? 'text-indigo-600' : 'text-amber-600'))}">
+                ${item.pct}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-600">${item.time}</td>
+            <td class="py-3 px-4 text-xs text-slate-400">${item.timestamp}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function filterTeacherStudentTable() {
-      const keyword = document.getElementById('tp-search-student').value.toLowerCase().trim();
+      const keyword = (document.getElementById('tp-search-student')?.value || '').toLowerCase().trim();
       const history = JSON.parse(localStorage.getItem('grammar_leaderboard') || '[]');
-      const filtered = history.filter(item => 
-        (item.name && item.name.toLowerCase().includes(keyword)) ||
-        (item.class && item.class.toLowerCase().includes(keyword)) ||
-        (item.topic && item.topic.toLowerCase().includes(keyword))
-      );
+
+      const filtered = history.filter(item => {
+        const matchesQuery = 
+          (item.name && item.name.toLowerCase().includes(keyword)) ||
+          (item.class && item.class.toLowerCase().includes(keyword)) ||
+          (item.topic && item.topic.toLowerCase().includes(keyword));
+
+        if (!matchesQuery) return false;
+
+        const pctVal = item.pctNum !== undefined ? item.pctNum : parseInt(item.pct || '0');
+        if (realtimeScoreFilter === 'excel') return !item.isCheated && pctVal >= 90;
+        if (realtimeScoreFilter === 'pass') return !item.isCheated && pctVal >= 70;
+        if (realtimeScoreFilter === 'review') return !item.isCheated && pctVal < 70;
+        if (realtimeScoreFilter === 'cheat') return !!item.isCheated;
+
+        return true;
+      });
+
       renderTeacherStudentTable(filtered);
     }
 
     function exportTeacherDataCSV() {
       const history = JSON.parse(localStorage.getItem('grammar_leaderboard') || '[]');
       if (history.length === 0) {
-        alert("Chưa có dữ liệu bài làm để xuất CSV!");
+        showCustomNotice("Chưa có dữ liệu bài làm để xuất CSV!");
         return;
       }
 
